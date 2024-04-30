@@ -151,12 +151,19 @@ class MusifyAudioHandler extends BaseAudioHandler {
   }
 
   void _updatePlaybackState() {
+    final hasPreviousOrNext = hasPrevious || hasNext;
     playbackState.add(
       playbackState.value.copyWith(
         controls: [
-          MediaControl.skipToPrevious,
+          if (hasPreviousOrNext)
+            MediaControl.skipToPrevious
+          else
+            MediaControl.rewind,
           if (audioPlayer.playing) MediaControl.pause else MediaControl.play,
-          MediaControl.skipToNext,
+          if (hasPreviousOrNext)
+            MediaControl.skipToNext
+          else
+            MediaControl.fastForward,
           MediaControl.stop,
         ],
         systemActions: const {
@@ -240,6 +247,14 @@ class MusifyAudioHandler extends BaseAudioHandler {
   @override
   Future<void> seek(Duration position) => audioPlayer.seek(position);
 
+  @override
+  Future<void> fastForward() =>
+      seek(Duration(seconds: audioPlayer.position.inSeconds + 15));
+
+  @override
+  Future<void> rewind() =>
+      seek(Duration(seconds: audioPlayer.position.inSeconds - 15));
+
   Future<void> playSong(Map song) async {
     try {
       final isOffline = song['isOffline'] ?? false;
@@ -254,6 +269,15 @@ class MusifyAudioHandler extends BaseAudioHandler {
     } catch (e, stackTrace) {
       logger.log('Error playing song', e, stackTrace);
     }
+  }
+
+  Future<void> playPlaylistSong({
+    Map<dynamic, dynamic>? playlist,
+    required int songIndex,
+  }) async {
+    if (playlist != null) activePlaylist = playlist;
+    id = songIndex;
+    await audioHandler.playSong(activePlaylist['list'][id]);
   }
 
   Future<AudioSource> buildAudioSource(

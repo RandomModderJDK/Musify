@@ -2,8 +2,9 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:musify/API/musify.dart';
 import 'package:musify/extensions/l10n.dart';
-import 'package:musify/utilities/flutter_toast.dart';
+import 'package:musify/main.dart';
 import 'package:musify/widgets/playlist_cube.dart';
+import 'package:musify/widgets/playlist_header.dart';
 import 'package:musify/widgets/song_bar.dart';
 
 class UserSongsPage extends StatefulWidget {
@@ -30,7 +31,6 @@ class _UserSongsPageState extends State<UserSongsPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
         actions: [
           if (title == context.l10n!.userLikedSongs)
             IconButton(
@@ -61,7 +61,10 @@ class _UserSongsPageState extends State<UserSongsPage> {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
-          child: buildPlaylistHeader(title, icon, songsList),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: buildPlaylistHeader(title, icon, songsList.length),
+          ),
         ),
         buildSongList(title, songsList, length),
       ],
@@ -100,38 +103,12 @@ class _UserSongsPageState extends State<UserSongsPage> {
         currentLikedSongsLength;
   }
 
-  Widget buildPlaylistHeader(String title, IconData icon, List songsList) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          _buildPlaylistImage(title, icon),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '[ ${songsList.length} ${context.l10n!.songs} ]'.toUpperCase(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-              buildPlayButton(title, songsList),
-            ],
-          ),
-        ],
-      ),
+  Widget buildPlaylistHeader(String title, IconData icon, int songsLength) {
+    return PlaylistHeader(
+      _buildPlaylistImage(title, icon),
+      title,
+      null,
+      songsLength,
     );
   }
 
@@ -140,47 +117,30 @@ class _UserSongsPageState extends State<UserSongsPage> {
       title: title,
       onClickOpen: false,
       showFavoriteButton: false,
-      size: MediaQuery.of(context).size.width / 2.2,
+      size: MediaQuery.of(context).size.width / 2.5,
       cubeIcon: icon,
-    );
-  }
-
-  Widget buildPlayButton(String title, List songList) {
-    return GestureDetector(
-      onTap: () {
-        setActivePlaylist({
-          'ytid': '',
-          'title': title,
-          'header_desc': '',
-          'image': '',
-          'list': songList,
-        });
-        showToast(
-          context,
-          context.l10n!.queueInitText,
-        );
-      },
-      child: Icon(
-        FluentIcons.play_circle_48_filled,
-        color: Theme.of(context).colorScheme.primary,
-        size: 60,
-      ),
     );
   }
 
   Widget buildSongList(
     String title,
-    List songList,
+    List songsList,
     ValueNotifier currentSongsLength,
   ) {
+    final _playlist = {
+      'ytid': '',
+      'title': title,
+      'list': songsList,
+    };
     return ValueListenableBuilder(
       valueListenable: currentSongsLength,
       builder: (_, value, __) {
         if (title == context.l10n!.userLikedSongs) {
           return SliverReorderableList(
-            itemCount: songList.length,
+            itemCount: songsList.length,
             itemBuilder: (context, index) {
-              final song = songList[index];
+              final song = songsList[index];
+
               return ReorderableDragStartListener(
                 enabled: isEditEnabled,
                 key: Key(song['ytid'].toString()),
@@ -188,7 +148,12 @@ class _UserSongsPageState extends State<UserSongsPage> {
                 child: SongBar(
                   song,
                   true,
-                  songIndexInPlaylist: index,
+                  onPlay: () => {
+                    audioHandler.playPlaylistSong(
+                      playlist: activePlaylist != _playlist ? _playlist : null,
+                      songIndex: index,
+                    ),
+                  },
                 ),
               );
             },
@@ -205,11 +170,20 @@ class _UserSongsPageState extends State<UserSongsPage> {
           return SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
-                final song = songList[index];
+                final song = songsList[index];
                 song['isOffline'] = title == context.l10n!.userOfflineSongs;
-                return SongBar(song, true);
+                return SongBar(
+                  song,
+                  true,
+                  onPlay: () => {
+                    audioHandler.playPlaylistSong(
+                      playlist: activePlaylist != _playlist ? _playlist : null,
+                      songIndex: index,
+                    ),
+                  },
+                );
               },
-              childCount: songList.length,
+              childCount: songsList.length,
             ),
           );
         }

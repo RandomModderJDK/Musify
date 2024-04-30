@@ -13,10 +13,10 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '12.x'
+          java-version: '17.x'
 
       # Gradle cache for faster builds
-      - uses: actions/cache@v3
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches

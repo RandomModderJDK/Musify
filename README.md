@@ -55,7 +55,7 @@ Material UI & Accent Colors & Dynamic Colors (Android 12+) <br/>
 
 
 ```
-Copyright © 2023 Valeri Gokadze
+Copyright © 2024 Valeri Gokadze
 
 Musify is a free software licensed under GPL v3.0
 It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
@@ -110,6 +110,7 @@ You can see frequently asked questions and their answers [here](https://github.c
 - [fluentui_system_icons](https://pub.dev/packages/fluentui_system_icons): A package that provides Fluent System Icons for Flutter.
 - [flutter](https://flutter.dev/): The Flutter SDK.
 - [flutter_localizations](https://flutter.dev/docs/development/accessibility-and-localization/internationalization): Internationalization and localization support for Flutter.
+- [flutter_flip_card](https://pub.dev/packages/flutter_flip_card): A component that provides a flip card animation.
 - [google_fonts](https://pub.dev/packages/google_fonts): A package to use Google Fonts in Flutter.
 - [hive](https://pub.dev/packages/hive): A lightweight and efficient key-value database for Flutter.
 - [hive_flutter](https://pub.dev/packages/hive_flutter): Hive database support for Flutter.

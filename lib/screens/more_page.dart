@@ -13,6 +13,7 @@ import 'package:musify/style/app_colors.dart';
 import 'package:musify/style/app_themes.dart';
 import 'package:musify/utilities/flutter_toast.dart';
 import 'package:musify/utilities/url_launcher.dart';
+import 'package:musify/widgets/confirmation_dialog.dart';
 import 'package:musify/widgets/setting_bar.dart';
 import 'package:musify/widgets/setting_switch_bar.dart';
 
@@ -105,6 +106,7 @@ class MorePage extends StatelessWidget {
                       physics: const BouncingScrollPhysics(),
                       itemCount: availableColors.length,
                       itemBuilder: (context, index) {
+                        final color = availableColors[index];
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 15),
                           child: Row(
@@ -116,11 +118,11 @@ class MorePage extends StatelessWidget {
                                     addOrUpdateData(
                                       'settings',
                                       'accentColor',
-                                      availableColors[index].value,
+                                      color.value,
                                     );
                                     Musify.updateAppState(
                                       context,
-                                      newAccentColor: availableColors[index],
+                                      newAccentColor: color,
                                       useSystemColor: false,
                                     );
                                     showToast(
@@ -136,9 +138,8 @@ class MorePage extends StatelessWidget {
                                       radius: 25,
                                       backgroundColor:
                                           themeMode == ThemeMode.light
-                                              ? availableColors[index]
-                                                  .withAlpha(150)
-                                              : availableColors[index],
+                                              ? color.withAlpha(150)
+                                              : color,
                                     ),
                                   ),
                                 ),
@@ -171,34 +172,31 @@ class MorePage extends StatelessWidget {
                       physics: const BouncingScrollPhysics(),
                       itemCount: availableModes.length,
                       itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Card(
-                            elevation:
-                                themeMode == availableModes[index] ? 0 : 4,
-                            child: ListTile(
-                              title: Text(
-                                availableModes[index].name,
-                              ),
-                              onTap: () {
-                                addOrUpdateData(
-                                  'settings',
-                                  'themeMode',
-                                  availableModes[index].name,
-                                );
-                                Musify.updateAppState(
-                                  context,
-                                  newThemeMode: availableModes[index],
-                                );
-
-                                Navigator.pop(context);
-                              },
-                              trailing: availableModes[index] ==
-                                          ThemeMode.light ||
-                                      availableModes[index] == ThemeMode.system
-                                  ? const Text('BETA')
-                                  : null,
+                        final mode = availableModes[index];
+                        return Card(
+                          margin: const EdgeInsets.all(10),
+                          elevation: themeMode == mode ? 0 : 4,
+                          child: ListTile(
+                            title: Text(
+                              mode.name,
                             ),
+                            onTap: () {
+                              addOrUpdateData(
+                                'settings',
+                                'themeMode',
+                                mode.name,
+                              );
+                              Musify.updateAppState(
+                                context,
+                                newThemeMode: mode,
+                              );
+
+                              Navigator.pop(context);
+                            },
+                            trailing: mode == ThemeMode.light ||
+                                    mode == ThemeMode.system
+                                ? const Text('BETA')
+                                : null,
                           ),
                         );
                       },
@@ -227,35 +225,32 @@ class MorePage extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final language = availableLanguages[index];
                         final languageCode = appLanguages[language] ?? 'en';
-                        return Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Card(
-                            elevation:
-                                activeLanguageCode == languageCode ? 0 : 4,
-                            child: ListTile(
-                              title: Text(
-                                language,
-                              ),
-                              onTap: () {
-                                addOrUpdateData(
-                                  'settings',
-                                  'language',
-                                  language,
-                                );
-                                Musify.updateAppState(
-                                  context,
-                                  newLocale: Locale(
-                                    languageCode,
-                                  ),
-                                );
-
-                                showToast(
-                                  context,
-                                  context.l10n!.languageMsg,
-                                );
-                                Navigator.pop(context);
-                              },
+                        return Card(
+                          elevation: activeLanguageCode == languageCode ? 0 : 4,
+                          margin: const EdgeInsets.all(10),
+                          child: ListTile(
+                            title: Text(
+                              language,
                             ),
+                            onTap: () {
+                              addOrUpdateData(
+                                'settings',
+                                'language',
+                                language,
+                              );
+                              Musify.updateAppState(
+                                context,
+                                newLocale: Locale(
+                                  languageCode,
+                                ),
+                              );
+
+                              showToast(
+                                context,
+                                context.l10n!.languageMsg,
+                              );
+                              Navigator.pop(context);
+                            },
                           ),
                         );
                       },
@@ -278,7 +273,7 @@ class MorePage extends StatelessWidget {
                 useSystemColor.value = value;
                 Musify.updateAppState(
                   context,
-                  newAccentColor: primaryColor,
+                  newAccentColor: primaryColorSetting,
                   useSystemColor: value,
                 );
                 showToast(
@@ -379,21 +374,50 @@ class MorePage extends StatelessWidget {
               },
             ),
             SettingBar(
-              context.l10n!.clearSearchHistory,
-              FluentIcons.history_24_filled,
-              () {
-                searchHistory = [];
-                deleteData('user', 'searchHistory');
-                showToast(context, '${context.l10n!.searchHistoryMsg}!');
-              },
-            ),
+                context.l10n!.clearSearchHistory, FluentIcons.history_24_filled,
+                () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return ConfirmationDialog(
+                    submitMessage: context.l10n!.clear,
+                    confirmationMessage:
+                        context.l10n!.clearSearchHistoryQuestion,
+                    onCancel: () => {Navigator.of(context).pop()},
+                    onSubmit: () => {
+                      Navigator.of(context).pop(),
+                      searchHistory = [],
+                      deleteData('user', 'searchHistory'),
+                      showToast(context, '${context.l10n!.searchHistoryMsg}!'),
+                    },
+                  );
+                },
+              );
+            }),
             SettingBar(
               context.l10n!.clearRecentlyPlayed,
               FluentIcons.receipt_play_24_filled,
               () {
-                userRecentlyPlayed = [];
-                deleteData('user', 'recentlyPlayedSongs');
-                showToast(context, '${context.l10n!.recentlyPlayedMsg}!');
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return ConfirmationDialog(
+                      submitMessage: context.l10n!.clear,
+                      confirmationMessage:
+                          context.l10n!.clearRecentlyPlayedQuestion,
+                      onCancel: () => {Navigator.of(context).pop()},
+                      onSubmit: () => {
+                        Navigator.of(context).pop(),
+                        userRecentlyPlayed = [],
+                        deleteData('user', 'recentlyPlayedSongs'),
+                        showToast(
+                          context,
+                          '${context.l10n!.recentlyPlayedMsg}!',
+                        ),
+                      },
+                    );
+                  },
+                );
               },
             ),
             SettingBar(

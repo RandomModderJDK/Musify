@@ -18,11 +18,14 @@ String formatSongTitle(String title) {
     'Lyrics Video': '',
   };
 
-  replacements.forEach((pattern, replacement) {
-    title = title.replaceAll(pattern, replacement);
-  });
+  final pattern = RegExp(replacements.keys.map(RegExp.escape).join('|'));
 
-  return title;
+  return title
+      .replaceAllMapped(
+        pattern,
+        (match) => replacements[match.group(0)] ?? '',
+      )
+      .trimLeft();
 }
 
 Map<String, dynamic> returnSongLayout(int index, Video song) => {
@@ -35,12 +38,12 @@ Map<String, dynamic> returnSongLayout(int index, Video song) => {
       'image': song.thumbnails.standardResUrl,
       'lowResImage': song.thumbnails.lowResUrl,
       'highResImage': song.thumbnails.maxResUrl,
-      'duration': song.duration?.inMilliseconds,
+      'duration': song.duration?.inSeconds,
       'isLive': song.isLive,
     };
 
-String formatDuration(int milliseconds) {
-  final duration = Duration(milliseconds: milliseconds);
+String formatDuration(int audioDurationInSeconds) {
+  final duration = Duration(seconds: audioDurationInSeconds);
 
   final hours = duration.inHours;
   final minutes = duration.inMinutes.remainder(60);

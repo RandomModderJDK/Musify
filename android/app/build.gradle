@@ -32,15 +32,15 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.gokadzev.musify"
     compileSdk 34
-    ndkVersion flutter.ndkVersion
+    ndkVersion "26.2.11394342"
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '17'
     }
 
     sourceSets {
@@ -83,6 +83,10 @@ android {
             keyPassword keystoreProperties['keyPassword']
             storePassword keystoreProperties['storePassword']
         }
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {

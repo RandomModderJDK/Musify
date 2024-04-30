@@ -15,17 +15,15 @@ class SongBar extends StatelessWidget {
     this.song,
     this.clearPlaylist, {
     this.showMusicDuration = false,
-    this.updateOnRemove,
-    this.passingPlaylist,
-    this.songIndexInPlaylist,
+    this.onPlay,
+    this.onRemove,
     super.key,
   });
 
   final dynamic song;
   final bool clearPlaylist;
-  final VoidCallback? updateOnRemove;
-  final dynamic passingPlaylist;
-  final int? songIndexInPlaylist;
+  final VoidCallback? onRemove;
+  final VoidCallback? onPlay;
   final bool showMusicDuration;
 
   static const likeStatusToIconMapper = {
@@ -39,20 +37,22 @@ class SongBar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: GestureDetector(
-        onTap: () {
-          audioHandler.playSong(song);
-          if (activePlaylist.isNotEmpty && clearPlaylist) {
-            activePlaylist = {
-              'ytid': '',
-              'title': 'No Playlist',
-              'header_desc': '',
-              'image': '',
-              'list': [],
-            };
-            id = 0;
-          }
-        },
+        onTap: onPlay ??
+            () {
+              audioHandler.playSong(song);
+              if (activePlaylist.isNotEmpty && clearPlaylist) {
+                activePlaylist = {
+                  'ytid': '',
+                  'title': 'No Playlist',
+                  'header_desc': '',
+                  'image': '',
+                  'list': [],
+                };
+                id = 0;
+              }
+            },
         child: Card(
+          elevation: 1.5,
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Row(
@@ -73,15 +73,13 @@ class SongBar extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 5),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 5),
-                        child: Text(
-                          song['artist'].toString(),
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w400,
-                            fontSize: 14,
-                          ),
+                      Text(
+                        song['artist'].toString(),
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 14,
+                          color: Theme.of(context).colorScheme.secondary,
                         ),
                       ),
                     ],
@@ -97,30 +95,35 @@ class SongBar extends StatelessWidget {
   }
 
   Widget _buildAlbumArt() {
-    if ((song['isOffline'] ?? false) && song['artworkPath'] != null) {
+    const size = 60.0;
+    const radius = 12.0;
+
+    final bool isOffline = song['isOffline'] ?? false;
+    final String? artworkPath = song['artworkPath'];
+    if (isOffline && artworkPath != null) {
       return SizedBox(
-        width: 60,
-        height: 60,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            image: DecorationImage(
-              image: FileImage(File(song['lowResImage'].toString())),
-              fit: BoxFit.cover,
-            ),
+        width: size,
+        height: size,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(radius),
+          child: Image.file(
+            File(artworkPath),
+            fit: BoxFit.cover,
           ),
         ),
       );
     } else {
       return CachedNetworkImage(
         key: Key(song['ytid'].toString()),
-        width: 60,
-        height: 60,
+        width: size,
+        height: size,
         imageUrl: song['lowResImage'].toString(),
-        imageBuilder: (context, imageProvider) => DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            image: DecorationImage(
+        imageBuilder: (context, imageProvider) => SizedBox(
+          width: size,
+          height: size,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: Image(
               image: imageProvider,
               centerSlice: const Rect.fromLTRB(1, 1, 1, 1),
             ),
@@ -161,33 +164,34 @@ class SongBar extends StatelessWidget {
             );
           },
         ),
-        IconButton(
-          color: primaryColor,
-          icon: passingPlaylist != null && songIndexInPlaylist != null
-              ? const Icon(FluentIcons.delete_24_filled)
-              : const Icon(FluentIcons.add_24_regular),
-          onPressed: () =>
-              passingPlaylist != null && songIndexInPlaylist != null
-                  ? _removeFromPlaylist()
-                  : showAddToPlaylistDialog(context, song),
-        ),
-        if (isAndroid)
-          ValueListenableBuilder<bool>(
-            valueListenable: songOfflineStatus,
-            builder: (_, value, __) {
-              return IconButton(
-                color: primaryColor,
-                icon: Icon(
-                  value
-                      ? FluentIcons.cellular_off_24_regular
-                      : FluentIcons.cellular_data_1_24_regular,
-                ),
-                onPressed: () {
-                  if (value) {
-                    removeSongFromOffline(song['ytid']);
-                  } else {
-                    makeSongOffline(song);
-                  }
+        if (onRemove != null)
+          IconButton(
+            color: primaryColor,
+            icon: const Icon(FluentIcons.delete_24_filled),
+            onPressed: () => onRemove!(),
+          )
+        else
+          IconButton(
+            color: primaryColor,
+            icon: const Icon(FluentIcons.add_24_regular),
+            onPressed: () => showAddToPlaylistDialog(context, song),
+          ),
+        ValueListenableBuilder<bool>(
+          valueListenable: songOfflineStatus,
+          builder: (_, value, __) {
+            return IconButton(
+              color: primaryColor,
+              icon: Icon(
+                value
+                    ? FluentIcons.cellular_off_24_regular
+                    : FluentIcons.cellular_data_1_24_regular,
+              ),
+              onPressed: () {
+                if (value) {
+                  removeSongFromOffline(song['ytid']);
+                } else {
+                  makeSongOffline(song);
+                }
 
                   songOfflineStatus.value = !songOfflineStatus.value;
                 },
@@ -198,18 +202,6 @@ class SongBar extends StatelessWidget {
           Text('(${formatDuration(song['duration'])})'),
       ],
     );
-  }
-
-  void _removeFromPlaylist() {
-    if (passingPlaylist == null || songIndexInPlaylist == null) {
-      return;
-    }
-    removeSongFromPlaylist(
-      passingPlaylist,
-      song,
-      removeOneAtIndex: songIndexInPlaylist,
-    );
-    if (updateOnRemove != null) updateOnRemove!();
   }
 }
 
@@ -231,7 +223,7 @@ void showAddToPlaylistDialog(BuildContext context, dynamic song) {
                   title: Text(playlist['title']),
                   onTap: () {
                     addSongInCustomPlaylist(playlist['title'], song);
-                    showToast(context, context.l10n!.addedSuccess);
+                    showToast(context, context.l10n!.songAdded);
                     Navigator.pop(context);
                   },
                 ),

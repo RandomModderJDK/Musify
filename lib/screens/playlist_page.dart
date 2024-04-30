@@ -4,11 +4,11 @@ import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:musify/API/musify.dart';
 import 'package:musify/extensions/l10n.dart';
+import 'package:musify/main.dart';
 import 'package:musify/services/data_manager.dart';
 import 'package:musify/utilities/flutter_toast.dart';
-import 'package:musify/widgets/marque.dart';
-import 'package:musify/widgets/play_button.dart';
 import 'package:musify/widgets/playlist_cube.dart';
+import 'package:musify/widgets/playlist_header.dart';
 import 'package:musify/widgets/song_bar.dart';
 import 'package:musify/widgets/spinner.dart';
 
@@ -116,7 +116,10 @@ class _PlaylistPageState extends State<PlaylistPage> {
           ? CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
-                  child: buildPlaylistHeader(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: buildPlaylistHeader(),
+                  ),
                 ),
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
@@ -142,6 +145,7 @@ class _PlaylistPageState extends State<PlaylistPage> {
       image: _playlist['image'],
       title: _playlist['title'],
       isAlbum: _playlist['isAlbum'],
+      size: MediaQuery.of(context).size.width / 2.5,
       onClickOpen: false,
       cubeIcon: widget.cubeIcon,
       showFavoriteButton: false,
@@ -149,57 +153,13 @@ class _PlaylistPageState extends State<PlaylistPage> {
   }
 
   Widget buildPlaylistHeader() {
-    final playlistLength = _playlist['list'].length;
+    final _songsLength = _playlist['list'].length;
 
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          _buildPlaylistImage(),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            child: MarqueeWidget(
-              child: Text(
-                _playlist['title'],
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          if (_playlist['header_desc'] != null)
-            Text(
-              _playlist['header_desc'],
-              style: const TextStyle(
-                fontWeight: FontWeight.w300,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '[ $playlistLength ${context.l10n!.songs} ]'.toUpperCase(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w300,
-                ),
-              ),
-              PlayButton(
-                onTap: () {
-                  setActivePlaylist(_playlist);
-                  showToast(
-                    context,
-                    context.l10n!.queueInitText,
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
+    return PlaylistHeader(
+      _buildPlaylistImage(),
+      _playlist['title'],
+      _playlist['header_desc'],
+      _songsLength,
     );
   }
 
@@ -375,11 +335,22 @@ class _PlaylistPageState extends State<PlaylistPage> {
     return SongBar(
       _songsList[index],
       true,
-      updateOnRemove: () => _playlist['isCustom'] == true
-          ? _updateSongsListOnRemove(index)
+      onRemove: _playlist['isCustom'] == true
+          ? () => {
+                removeSongFromPlaylist(
+                  _playlist,
+                  _songsList[index],
+                  removeOneAtIndex: index,
+                ),
+                _updateSongsListOnRemove(index),
+              }
           : null,
-      passingPlaylist: widget.playlistData,
-      songIndexInPlaylist: _playlist['isCustom'] == true ? index : null,
+      onPlay: () => {
+        audioHandler.playPlaylistSong(
+          playlist: activePlaylist != _playlist ? _playlist : null,
+          songIndex: index,
+        ),
+      },
     );
   }
 }

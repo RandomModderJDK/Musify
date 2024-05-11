@@ -1,3 +1,24 @@
+/*
+ *     Copyright (C) 2024 Valeri Gokadze
+ *
+ *     Musify is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Musify is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *
+ *     For more information about Musify, including how to contribute,
+ *     please visit: https://github.com/gokadzev/Musify
+ */
+
 List albumsDB = [
   {
     'ytid': 'PLS5_MK8e_MzSNmCQ3_AqbQL1JOM4Yy-_v',
@@ -290,6 +311,70 @@ List albumsDB = [
     'ytid': 'OLAK5uy_kq_gJdWJ9LUwgYzXMWeocvSyee4OqsvOQ',
     'title': 'Norman Fucking Rockwell! - Lana Del Rey',
     'image': 'https://i.scdn.co/image/ab67616d0000b273879e9318cb9f4e05ee552ac9',
+    'isAlbum': true,
+    'list': [],
+  },
+  {
+    'ytid': 'OLAK5uy_lFbfW_UOra8dYRTa69lxR3fxYjogNtiQw',
+    'title': 'THE TORTURED POETS DEPARTMENT - Taylor Swift',
+    'image': 'https://i.scdn.co/image/ab67616d0000b2735076e4160d018e378f488c33',
+    'isAlbum': true,
+    'list': [],
+  },
+  {
+    'ytid': 'OLAK5uy_lVxq_QCXDlleCnpsszQyiFextilkX12_w',
+    'title': "WE DON'T TRUST YOU - Future, Metro Boomin",
+    'image': 'https://i.scdn.co/image/ab67616d00001e02a46b07c291e6dfdee13b3ee8',
+    'isAlbum': true,
+    'list': [],
+  },
+  {
+    'ytid': 'OLAK5uy_kZqVnh5DXwZ95R5yuAnWUX20OjrNJh09U',
+    'title': 'Fireworks & Rollerblades - Benson Boone',
+    'image': 'https://i.scdn.co/image/ab67616d0000b273cc04ff3e70e146ba9abacf40',
+    'isAlbum': true,
+    'list': [],
+  },
+  {
+    'ytid': 'OLAK5uy_mbcpEgHbfi3deQRnyGfQWnlzgQd86_tMI',
+    'title': 'Wasteland, Baby! - Hozier',
+    'image': 'https://i.scdn.co/image/ab67616d00001e025795e01c151ba5a8ce4bd295',
+    'isAlbum': true,
+    'list': [],
+  },
+  {
+    'ytid': 'OLAK5uy_mG42_gxfZ-Cq6Y921XWm43Z75YAiaSIWI',
+    'title': 'eternal sunshine (slightly deluxe) - Ariana Grande',
+    'image': 'https://i.scdn.co/image/ab67616d0000b273bd3de668e4784d791c4ab695',
+    'isAlbum': true,
+    'list': [],
+  },
+  {
+    'ytid': 'OLAK5uy_kmtA2RV4sA_baCJwuaazeDtKmBM85j-yo',
+    'title': 'UTOPIA - Travis Scott',
+    'image': 'https://i.scdn.co/image/ab67616d00001e02881d8d8378cd01099babcd44',
+    'isAlbum': true,
+    'list': [],
+  },
+  {
+    'ytid': 'OLAK5uy_kDuqdPyyBdToRV-mvWklRE_ysv7-LqveI',
+    'title': 'One Thing At A Time - Morgan Wallen',
+    'image': 'https://i.scdn.co/image/ab67616d0000b273705079df9a25a28b452c1fc9',
+    'isAlbum': true,
+    'list': [],
+  },
+  {
+    'ytid': 'OLAK5uy_kFa9tOyLsP4JH1EqSD3hIudVdkmQWfKT0',
+    'title': 'DECIDE - Djo',
+    'image': 'https://i.scdn.co/image/ab67616d0000b273fddfffec51b4580acae727c1',
+    'isAlbum': true,
+    'list': [],
+  },
+  {
+    'ytid': 'OLAK5uy_ngyCd9rAr-KZ5eI5juhaOe-LgrjlteONU',
+    'title':
+        'Hard To Imagine The Neighbourhood Ever Changing - The Neighbourhood',
+    'image': 'https://i.scdn.co/image/ab67616d0000b2739b6ac98a52f62d5cb473da40',
     'isAlbum': true,
     'list': [],
   }

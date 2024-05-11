@@ -1,3 +1,24 @@
+/*
+ *     Copyright (C) 2024 Valeri Gokadze
+ *
+ *     Musify is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Musify is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *
+ *     For more information about Musify, including how to contribute,
+ *     please visit: https://github.com/gokadzev/Musify
+ */
+
 import 'dart:async';
 import 'dart:io';
 
@@ -9,11 +30,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:musify/services/audio_service.dart';
 import 'package:musify/services/data_manager.dart';
 import 'package:musify/services/logger_service.dart';
 import 'package:musify/services/router_service.dart';
 import 'package:musify/services/settings_manager.dart';
+import 'package:musify/services/update_manager.dart';
 import 'package:musify/style/app_themes.dart';
 
 late MusifyAudioHandler audioHandler;
@@ -23,6 +46,8 @@ final logger = Logger();
 bool isAndroid = Platform.isAndroid;
 bool isFdroidBuild = false;
 bool isUpdateChecked = false;
+
+late bool isOnline;
 
 final appLanguages = <String, String>{
   'English': 'en',
@@ -122,6 +147,17 @@ class _MusifyState extends State<Musify> {
     } catch (e, stackTrace) {
       logger.log('License Registration Error', e, stackTrace);
     }
+
+    if (isAndroid &&
+        !isFdroidBuild &&
+        !isUpdateChecked &&
+        isOnline &&
+        kReleaseMode) {
+      Future.delayed(Duration.zero, () {
+        checkAppUpdates();
+        isUpdateChecked = true;
+      });
+    }
   }
 
   @override
@@ -189,6 +225,8 @@ Future<void> initialisation() async {
         androidShowNotificationBadge: true,
       ),
     );
+
+    isOnline = await InternetConnection().hasInternetAccess;
 
     // Init router
     NavigationManager.instance;

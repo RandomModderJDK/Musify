@@ -1,3 +1,24 @@
+/*
+ *     Copyright (C) 2024 Valeri Gokadze
+ *
+ *     Musify is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Musify is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *
+ *     For more information about Musify, including how to contribute,
+ *     please visit: https://github.com/gokadzev/Musify
+ */
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:musify/API/musify.dart';
@@ -31,8 +52,9 @@ class _UserSongsPageState extends State<UserSongsPage> {
 
     return Scaffold(
       appBar: AppBar(
+        title: !isOnline ? Text(title) : null,
         actions: [
-          if (title == context.l10n!.userLikedSongs)
+          if (title == context.l10n!.likedSongs)
             IconButton(
               onPressed: () {
                 setState(() {
@@ -73,8 +95,8 @@ class _UserSongsPageState extends State<UserSongsPage> {
 
   String getTitle(String page, BuildContext context) {
     return {
-          'liked': context.l10n!.userLikedSongs,
-          'offline': context.l10n!.userOfflineSongs,
+          'liked': context.l10n!.likedSongs,
+          'offline': context.l10n!.offlineSongs,
         }[page] ??
         context.l10n!.playlist;
   }
@@ -107,7 +129,6 @@ class _UserSongsPageState extends State<UserSongsPage> {
     return PlaylistHeader(
       _buildPlaylistImage(title, icon),
       title,
-      null,
       songsLength,
     );
   }
@@ -135,7 +156,7 @@ class _UserSongsPageState extends State<UserSongsPage> {
     return ValueListenableBuilder(
       valueListenable: currentSongsLength,
       builder: (_, value, __) {
-        if (title == context.l10n!.userLikedSongs) {
+        if (title == context.l10n!.likedSongs) {
           return SliverReorderableList(
             itemCount: songsList.length,
             itemBuilder: (context, index) {
@@ -171,7 +192,7 @@ class _UserSongsPageState extends State<UserSongsPage> {
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 final song = songsList[index];
-                song['isOffline'] = title == context.l10n!.userOfflineSongs;
+                song['isOffline'] = title == context.l10n!.offlineSongs;
                 return SongBar(
                   song,
                   true,

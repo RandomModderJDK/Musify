@@ -1,16 +1,35 @@
+/*
+ *     Copyright (C) 2024 Valeri Gokadze
+ *
+ *     Musify is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Musify is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *
+ *     For more information about Musify, including how to contribute,
+ *     please visit: https://github.com/gokadzev/Musify
+ */
+
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:musify/API/musify.dart';
 import 'package:musify/extensions/l10n.dart';
 import 'package:musify/main.dart';
 import 'package:musify/screens/playlist_page.dart';
 import 'package:musify/services/router_service.dart';
-import 'package:musify/services/update_manager.dart';
 import 'package:musify/widgets/artist_cube.dart';
 import 'package:musify/widgets/marque.dart';
 import 'package:musify/widgets/playlist_cube.dart';
-import 'package:musify/widgets/song_bar.dart';
+import 'package:musify/widgets/song_cube.dart';
 import 'package:musify/widgets/spinner.dart';
 
 class HomePage extends StatefulWidget {
@@ -21,15 +40,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  @override
-  void initState() {
-    super.initState();
-    if (isAndroid && !isFdroidBuild && !isUpdateChecked && kReleaseMode) {
-      checkAppUpdates(context);
-      isUpdateChecked = true;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,8 +55,75 @@ class _HomePageState extends State<HomePage> {
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
+            _buildTopNavBar(),
             _buildSuggestedPlaylists(),
             _buildRecommendedSongsAndArtists(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTopNavBar() {
+    return Padding(
+      padding: const EdgeInsetsDirectional.symmetric(
+        horizontal: 12,
+        vertical: 8,
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            FilledButton.tonalIcon(
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PlaylistPage(
+                    playlistData: {
+                      'title': context.l10n!.recentlyPlayed,
+                      'list': userRecentlyPlayed,
+                    },
+                  ),
+                ),
+              ),
+              icon: const Icon(FluentIcons.history_24_filled),
+              label: Text(context.l10n!.recentlyPlayed),
+            ),
+            const SizedBox(width: 10),
+            FilledButton.tonalIcon(
+              onPressed: () => NavigationManager.router.go(
+                '/home/playlists',
+              ),
+              icon: const Icon(FluentIcons.list_24_filled),
+              label: Text(context.l10n!.playlists),
+            ),
+            const SizedBox(width: 10),
+            FilledButton.tonalIcon(
+              onPressed: () => NavigationManager.router.go(
+                '/home/userSongs/liked',
+              ),
+              icon: const Icon(FluentIcons.heart_24_filled),
+              label: Text(context.l10n!.likedSongs),
+            ),
+            if (isAndroid) const SizedBox(width: 10),
+            if (isAndroid)
+              FilledButton.tonalIcon(
+                onPressed: () => NavigationManager.router.go(
+                  '/home/userSongs/offline',
+                ),
+                icon: const Icon(FluentIcons.cellular_off_24_filled),
+                label: Text(context.l10n!.offlineSongs),
+              ),
+            const SizedBox(width: 10),
+            FilledButton.tonalIcon(
+              onPressed: () => NavigationManager.router.go(
+                '/home/userLikedPlaylists',
+              ),
+              icon: const Icon(
+                FluentIcons.star_24_filled,
+              ),
+              label: Text(context.l10n!.likedPlaylists),
+            ),
           ],
         ),
       ),
@@ -78,7 +155,8 @@ class _HomePageState extends State<HomePage> {
     }
 
     final _suggestedPlaylists = snapshot.data!;
-    final _screenHeight = MediaQuery.of(context).size.height;
+    final calculatedSize = MediaQuery.of(context).size.height * 0.25;
+    final _suggestedPlaylistsSize = calculatedSize / 1.1;
 
     return Column(
       children: [
@@ -97,7 +175,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         SizedBox(
-          height: _screenHeight * 0.25,
+          height: _suggestedPlaylistsSize,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             separatorBuilder: (_, __) => const SizedBox(width: 15),
@@ -110,7 +188,7 @@ class _HomePageState extends State<HomePage> {
                 image: playlist['image'],
                 title: playlist['title'],
                 isAlbum: playlist['isAlbum'],
-                size: _screenHeight * 0.25,
+                size: _suggestedPlaylistsSize,
               );
             },
           ),
@@ -223,13 +301,20 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const BouncingScrollPhysics(),
-          itemCount: data.length,
-          itemBuilder: (context, index) {
-            return SongBar(data[index], true);
-          },
+        SizedBox(
+          height: calculatedSize + 50,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            separatorBuilder: (_, __) => const SizedBox(width: 15),
+            itemCount: data.length,
+            padding: const EdgeInsets.symmetric(horizontal: 15),
+            itemBuilder: (context, index) {
+              return SongCube(
+                data[index],
+                size: calculatedSize / 1.1,
+              );
+            },
+          ),
         ),
       ],
     );

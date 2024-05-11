@@ -1,3 +1,24 @@
+/*
+ *     Copyright (C) 2024 Valeri Gokadze
+ *
+ *     Musify is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Musify is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *
+ *     For more information about Musify, including how to contribute,
+ *     please visit: https://github.com/gokadzev/Musify
+ */
+
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:musify/main.dart';
@@ -45,7 +66,7 @@ class MiniPlayer extends StatelessWidget {
             }
           : null,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18),
+        padding: const EdgeInsets.only(left: 18),
         height: 75,
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.secondaryContainer,
@@ -59,8 +80,11 @@ class MiniPlayer extends StatelessWidget {
               builder: (context, snapshot) {
                 return buildPlaybackIconButton(
                   snapshot.data,
-                  45,
+                  30,
                   Theme.of(context).colorScheme.primary,
+                  Colors.transparent,
+                  elevation: 0,
+                  padding: EdgeInsets.zero,
                 );
               },
             ),
@@ -76,7 +100,6 @@ class MiniPlayer extends StatelessWidget {
       child: SongArtworkWidget(
         metadata: metadata,
         size: 55,
-        borderRadius: 12,
         errorWidgetIconSize: 30,
       ),
     );

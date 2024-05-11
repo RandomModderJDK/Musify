@@ -1,3 +1,24 @@
+/*
+ *     Copyright (C) 2024 Valeri Gokadze
+ *
+ *     Musify is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Musify is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *
+ *     For more information about Musify, including how to contribute,
+ *     please visit: https://github.com/gokadzev/Musify
+ */
+
 import 'dart:math';
 
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
@@ -158,7 +179,6 @@ class _PlaylistPageState extends State<PlaylistPage> {
     return PlaylistHeader(
       _buildPlaylistImage(),
       _playlist['title'],
-      _playlist['header_desc'],
       _songsLength,
     );
   }
@@ -212,7 +232,6 @@ class _PlaylistPageState extends State<PlaylistPage> {
         builder: (BuildContext context) {
           var customPlaylistName = _playlist['title'];
           var imageUrl = _playlist['image'];
-          var description = _playlist['header_desc'];
 
           return AlertDialog(
             content: SingleChildScrollView(
@@ -238,16 +257,6 @@ class _PlaylistPageState extends State<PlaylistPage> {
                       imageUrl = value;
                     },
                   ),
-                  const SizedBox(height: 7),
-                  TextField(
-                    controller: TextEditingController(text: description),
-                    decoration: InputDecoration(
-                      labelText: context.l10n!.customPlaylistDesc,
-                    ),
-                    onChanged: (value) {
-                      description = value;
-                    },
-                  ),
                 ],
               ),
             ),
@@ -266,7 +275,6 @@ class _PlaylistPageState extends State<PlaylistPage> {
                         'title': customPlaylistName,
                         'isCustom': true,
                         if (imageUrl != null) 'image': imageUrl,
-                        if (description != null) 'header_desc': description,
                         'list': widget.playlistData['list'],
                       };
                       userCustomPlaylists[index] = newPlaylist;

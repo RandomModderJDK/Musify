@@ -1,3 +1,24 @@
+/*
+ *     Copyright (C) 2024 Valeri Gokadze
+ *
+ *     Musify is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Musify is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *
+ *     For more information about Musify, including how to contribute,
+ *     please visit: https://github.com/gokadzev/Musify
+ */
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -37,7 +58,6 @@ List suggestedPlaylists = [];
 Map activePlaylist = {
   'ytid': '',
   'title': 'No Playlist',
-  'header_desc': '',
   'image': '',
   'list': [],
 };
@@ -102,9 +122,6 @@ Future<List<dynamic>> getUserPlaylists() async {
       playlistsByUser.add({
         'ytid': plist.id.toString(),
         'title': plist.title,
-        'header_desc': plist.description.length < 120
-            ? plist.description
-            : plist.description.substring(0, 120),
         'image': null,
         'list': [],
       });
@@ -143,14 +160,12 @@ Future<String> addUserPlaylist(String playlistId, BuildContext context) async {
 String createCustomPlaylist(
   String playlistName,
   String? image,
-  String? description,
   BuildContext context,
 ) {
   final customPlaylist = {
     'title': playlistName,
     'isCustom': true,
     if (image != null) 'image': image,
-    if (description != null) 'header_desc': description,
     'list': [],
   };
   userCustomPlaylists.add(customPlaylist);
@@ -236,7 +251,6 @@ Future<void> updatePlaylistLikeStatus(
     userLikedPlaylists.add({
       'ytid': playlistId,
       'title': playlistTitle,
-      'header_desc': '',
       'image': playlistImage,
       'list': [],
     });

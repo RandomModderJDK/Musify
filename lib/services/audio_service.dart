@@ -1,3 +1,24 @@
+/*
+ *     Copyright (C) 2024 Valeri Gokadze
+ *
+ *     Musify is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Musify is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *
+ *     For more information about Musify, including how to contribute,
+ *     please visit: https://github.com/gokadzev/Musify
+ */
+
 import 'dart:async';
 import 'dart:math';
 
@@ -17,7 +38,6 @@ class MusifyAudioHandler extends BaseAudioHandler {
     _initializeAudioPlayer();
     _setupEventSubscriptions();
     _updatePlaybackState();
-    _initAudioPlaylist();
 
     _initialize();
   }
@@ -29,8 +49,6 @@ class MusifyAudioHandler extends BaseAudioHandler {
   late StreamSubscription<Duration?> _durationSubscription;
   late StreamSubscription<int?> _currentIndexSubscription;
   late StreamSubscription<SequenceState?> _sequenceStateSubscription;
-
-  final _playlist = ConcatenatingAudioSource(children: []);
 
   Stream<PositionData> get positionDataStream =>
       Rx.combineLatest3<Duration, Duration, Duration?, PositionData>(
@@ -140,14 +158,6 @@ class MusifyAudioHandler extends BaseAudioHandler {
         audioPlayer.currentIndexStream.listen(_handleCurrentSongIndexChanged);
     _sequenceStateSubscription =
         audioPlayer.sequenceStateStream.listen(_handleSequenceStateChange);
-  }
-
-  void _initAudioPlaylist() {
-    try {
-      audioPlayer.setAudioSource(_playlist);
-    } catch (e, stackTrace) {
-      logger.log('Error in setAudioSource', e, stackTrace);
-    }
   }
 
   void _updatePlaybackState() {
@@ -344,23 +354,6 @@ class MusifyAudioHandler extends BaseAudioHandler {
   @override
   Future<void> skipToPrevious() async {
     await skipToSong(id - 1);
-  }
-
-  @override
-  Future<void> skipToQueueItem(int index) async {
-    if (index < 0 || index >= _playlist.length) return;
-    await audioPlayer.seek(
-      Duration.zero,
-      index: audioPlayer.shuffleModeEnabled
-          ? audioPlayer.shuffleIndices![index]
-          : index,
-    );
-  }
-
-  @override
-  Future<void> updateQueue(List<MediaItem> queue) async {
-    await _playlist.clear();
-    await _playlist.addAll(createAudioSources(queue));
   }
 
   @override

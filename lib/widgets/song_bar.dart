@@ -1,3 +1,24 @@
+/*
+ *     Copyright (C) 2024 Valeri Gokadze
+ *
+ *     Musify is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     Musify is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ *
+ *     For more information about Musify, including how to contribute,
+ *     please visit: https://github.com/gokadzev/Musify
+ */
+
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -14,6 +35,7 @@ class SongBar extends StatelessWidget {
   SongBar(
     this.song,
     this.clearPlaylist, {
+    this.backgroundColor,
     this.showMusicDuration = false,
     this.onPlay,
     this.onRemove,
@@ -22,6 +44,7 @@ class SongBar extends StatelessWidget {
 
   final dynamic song;
   final bool clearPlaylist;
+  final Color? backgroundColor;
   final VoidCallback? onRemove;
   final VoidCallback? onPlay;
   final bool showMusicDuration;
@@ -44,7 +67,6 @@ class SongBar extends StatelessWidget {
                 activePlaylist = {
                   'ytid': '',
                   'title': 'No Playlist',
-                  'header_desc': '',
                   'image': '',
                   'list': [],
                 };
@@ -53,6 +75,7 @@ class SongBar extends StatelessWidget {
             },
         child: Card(
           elevation: 1.5,
+          color: backgroundColor,
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Row(
@@ -145,36 +168,41 @@ class SongBar extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ValueListenableBuilder<bool>(
-          valueListenable: songLikeStatus,
-          builder: (_, value, __) {
-            return IconButton(
-              color: primaryColor,
-              icon: Icon(likeStatusToIconMapper[value]),
-              onPressed: () {
-                songLikeStatus.value = !songLikeStatus.value;
-                updateSongLikeStatus(
-                  song['ytid'],
-                  songLikeStatus.value,
-                );
-                final likedSongsLength = currentLikedSongsLength.value;
-                currentLikedSongsLength.value =
-                    value ? likedSongsLength + 1 : likedSongsLength - 1;
-              },
-            );
-          },
-        ),
-        if (onRemove != null)
-          IconButton(
-            color: primaryColor,
-            icon: const Icon(FluentIcons.delete_24_filled),
-            onPressed: () => onRemove!(),
-          )
-        else
-          IconButton(
-            color: primaryColor,
-            icon: const Icon(FluentIcons.add_24_regular),
-            onPressed: () => showAddToPlaylistDialog(context, song),
+        if (isOnline)
+          Row(
+            children: [
+              ValueListenableBuilder<bool>(
+                valueListenable: songLikeStatus,
+                builder: (_, value, __) {
+                  return IconButton(
+                    color: primaryColor,
+                    icon: Icon(likeStatusToIconMapper[value]),
+                    onPressed: () {
+                      songLikeStatus.value = !songLikeStatus.value;
+                      updateSongLikeStatus(
+                        song['ytid'],
+                        songLikeStatus.value,
+                      );
+                      final likedSongsLength = currentLikedSongsLength.value;
+                      currentLikedSongsLength.value =
+                          value ? likedSongsLength + 1 : likedSongsLength - 1;
+                    },
+                  );
+                },
+              ),
+              if (onRemove != null)
+                IconButton(
+                  color: primaryColor,
+                  icon: const Icon(FluentIcons.delete_24_filled),
+                  onPressed: () => onRemove!(),
+                )
+              else
+                IconButton(
+                  color: primaryColor,
+                  icon: const Icon(FluentIcons.add_24_regular),
+                  onPressed: () => showAddToPlaylistDialog(context, song),
+                ),
+            ],
           ),
         ValueListenableBuilder<bool>(
           valueListenable: songOfflineStatus,
@@ -210,25 +238,27 @@ void showAddToPlaylistDialog(BuildContext context, dynamic song) {
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
-        title: Text(
-          context.l10n!.addToPlaylist,
-          style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final playlist in userCustomPlaylists)
-              Card(
-                child: ListTile(
-                  title: Text(playlist['title']),
-                  onTap: () {
-                    addSongInCustomPlaylist(playlist['title'], song);
-                    showToast(context, context.l10n!.songAdded);
-                    Navigator.pop(context);
-                  },
+        icon: const Icon(FluentIcons.text_bullet_list_add_24_filled),
+        title: Text(context.l10n!.addToPlaylist),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (final playlist in userCustomPlaylists)
+                Card(
+                  color: Theme.of(context).colorScheme.secondaryContainer,
+                  elevation: 0,
+                  child: ListTile(
+                    title: Text(playlist['title']),
+                    onTap: () {
+                      addSongInCustomPlaylist(playlist['title'], song);
+                      showToast(context, context.l10n!.songAdded);
+                      Navigator.pop(context);
+                    },
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       );
     },

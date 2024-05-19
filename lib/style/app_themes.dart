@@ -19,10 +19,12 @@
  *     please visit: https://github.com/gokadzev/Musify
  */
 
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:musify/services/settings_manager.dart';
+import 'package:musify/style/dynamic_color_temp_fix.dart';
 
 ThemeMode themeMode = getThemeMode(themeModeSetting);
 Brightness brightness = getBrightnessFromThemeMode(themeMode);
@@ -53,10 +55,41 @@ ThemeMode getThemeMode(String themeModeString) {
   }
 }
 
+ColorScheme getAppColorScheme(
+  ColorScheme? lightColorScheme,
+  ColorScheme? darkColorScheme,
+) {
+  if (useSystemColor.value &&
+      lightColorScheme != null &&
+      darkColorScheme != null) {
+    // Temporary fix until this will be fixed: https://github.com/material-foundation/flutter-packages/issues/582
+
+    (lightColorScheme, darkColorScheme) =
+        tempGenerateDynamicColourSchemes(lightColorScheme, darkColorScheme);
+  }
+
+  final selectedScheme =
+      (brightness == Brightness.light) ? lightColorScheme : darkColorScheme;
+
+  if (useSystemColor.value && selectedScheme != null) {
+    return selectedScheme;
+  } else {
+    return ColorScheme.fromSeed(
+      seedColor: primaryColorSetting,
+      brightness: brightness,
+    ).harmonized();
+  }
+}
+
 ThemeData getAppTheme(ColorScheme colorScheme) {
   final base = colorScheme.brightness == Brightness.light
       ? ThemeData.light()
       : ThemeData.dark();
+
+  // Some people said that Colors.transparent causes some issues, so better to use it this way
+  final trickyFixForTransparency = Colors.black.withOpacity(0.002);
+  final iconsBrightness =
+      brightness == Brightness.dark ? Brightness.light : Brightness.dark;
 
   return ThemeData(
     colorScheme: colorScheme,
@@ -67,6 +100,13 @@ ThemeData getAppTheme(ColorScheme colorScheme) {
         fontSize: 30,
         fontWeight: FontWeight.bold,
         color: colorScheme.primary,
+      ),
+      systemOverlayStyle: SystemUiOverlayStyle(
+        systemNavigationBarColor: trickyFixForTransparency,
+        systemNavigationBarDividerColor: trickyFixForTransparency,
+        statusBarColor: trickyFixForTransparency,
+        systemNavigationBarIconBrightness: iconsBrightness,
+        statusBarIconBrightness: iconsBrightness,
       ),
       elevation: 0,
     ),
@@ -90,21 +130,6 @@ ThemeData getAppTheme(ColorScheme colorScheme) {
       builders: {
         TargetPlatform.android: CupertinoPageTransitionsBuilder(),
       },
-    ),
-  );
-}
-
-void setSystemUIOverlayStyle(Brightness iconsBrightness) {
-  // Some people said that Colors.transparent causes some issues, so better to use it this way
-  final trickyFixForTransparency = Colors.black.withOpacity(0.002);
-
-  SystemChrome.setSystemUIOverlayStyle(
-    SystemUiOverlayStyle(
-      systemStatusBarContrastEnforced: true,
-      systemNavigationBarColor: trickyFixForTransparency,
-      systemNavigationBarDividerColor: trickyFixForTransparency,
-      systemNavigationBarIconBrightness: iconsBrightness,
-      statusBarIconBrightness: iconsBrightness,
     ),
   );
 }

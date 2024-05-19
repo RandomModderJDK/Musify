@@ -104,9 +104,6 @@ class _MusifyState extends State<Musify> {
       if (newThemeMode != null) {
         themeMode = newThemeMode;
         brightness = getBrightnessFromThemeMode(newThemeMode);
-        setSystemUIOverlayStyle(
-          brightness == Brightness.dark ? Brightness.light : Brightness.dark,
-        );
       }
       if (newLocale != null) {
         languageSetting = newLocale;
@@ -129,14 +126,6 @@ class _MusifyState extends State<Musify> {
   @override
   void initState() {
     super.initState();
-
-    SystemChrome.setEnabledSystemUIMode(
-      SystemUiMode.edgeToEdge,
-      overlays: [SystemUiOverlay.top],
-    );
-    setSystemUIOverlayStyle(
-      brightness == Brightness.dark ? Brightness.light : Brightness.dark,
-    );
 
     try {
       LicenseRegistry.addLicense(() async* {
@@ -170,15 +159,8 @@ class _MusifyState extends State<Musify> {
   Widget build(BuildContext context) {
     return DynamicColorBuilder(
       builder: (lightColorScheme, darkColorScheme) {
-        final selectedScheme =
-            brightness == Brightness.light ? lightColorScheme : darkColorScheme;
-
-        final colorScheme = useSystemColor.value && selectedScheme != null
-            ? selectedScheme
-            : ColorScheme.fromSeed(
-                seedColor: primaryColorSetting,
-                brightness: brightness,
-              ).harmonized();
+        final colorScheme =
+            getAppColorScheme(lightColorScheme, darkColorScheme);
 
         return MaterialApp.router(
           themeMode: themeMode,

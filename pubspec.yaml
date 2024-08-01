@@ -70,8 +70,12 @@ flutter_native_splash:
     icon_background_color_dark: '#151515'
 
 flutter_launcher_icons:
+  ios: true
+  image_path_ios: "assets/images/ic_launcher.png"
+  
   android: 'launcher_icon'
   adaptive_icon_background: '#191919'
   adaptive_icon_foreground: 'assets/images/ic_launcher_foreground.png'
   adaptive_icon_round: 'assets/images/ic_launcher_round.png'
   image_path: 'assets/images/ic_launcher.png'
+  

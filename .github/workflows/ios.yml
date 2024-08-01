@@ -86,6 +86,7 @@ jobs:
           brew install ldid
           chmod +x ${PWD}/scripts/package_ipa.sh 
           ${PWD}/scripts/package_ipa.sh ${PWD}/build/ios/archive/Runner.xcarchive .
+          ls
       - name: Get current date
         id: date
         run: echo "date={$(date +'%Y-%m-%d')}" >> $GITHUB_ENV

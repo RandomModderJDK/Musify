@@ -19,8 +19,6 @@ jobs:
           echo "days=$DAYS" >> $GITHUB_OUTPUT
       - uses: actions/checkout@v4
         if: steps.assets.output.days == 0
-        with:
-          ref: main
       - uses: subosito/flutter-action@v2
         if: steps.assets.output.days == 0
         with:

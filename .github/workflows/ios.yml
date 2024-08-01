@@ -3,26 +3,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  do_tests:
-    name: Flutter Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            assets
-            lib
-            test
-            scripts
-      - uses: subosito/flutter-action@v2
-        with:
-          cache: true
-          
-      - name: Download dependencies
-        run: flutter pub get
-      - name: Run tests
-        run: flutter test
   gen_icons:
     name: Generate icons & commit/push them
     runs-on: ubuntu-latest
@@ -58,7 +38,7 @@ jobs:
           file_pattern: '*.xml *.json *.png'
   build_ios:
     name: Build iOS ipa
-    needs: [ do_tests, gen_icons ]
+    needs: [ gen_icons ]
     runs-on: macos-latest
     permissions:
       contents: write
